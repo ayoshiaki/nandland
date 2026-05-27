@@ -92,10 +92,12 @@ Todo o desenvolvimento acontece no GitHub seguindo um fluxo baseado em **Pull Re
 <details>
 <summary><strong>1. Fork e clone</strong></summary>
 
+Faça o *fork* a partir do **repositório do grupo** (não do repositório original do professor):
+
 ```bash
 git clone https://github.com/<seu-usuario>/nandland.git
 cd nandland
-git remote add upstream https://github.com/<owner>/nandland.git
+git remote add upstream https://github.com/<grupo>/nandland.git
 ```
 </details>
 
@@ -135,7 +137,7 @@ Informe no corpo do Pull Request quais testes passam — ex.: `Fase 1: 12/12`, `
 <details>
 <summary><strong>5. Abra o Pull Request</strong></summary>
 
-Do seu *fork* para a branch `main` do repositório original. O título deve identificar a fase/passo, por exemplo:
+Do seu *fork* para a branch `main` do **repositório do grupo** (e não para o repositório original do professor). A integração e a revisão acontecem dentro do grupo; somente o repositório do grupo dialoga com o original. O título deve identificar a fase/passo, por exemplo:
 
 > `Fase 2 — Porta NAND e propagação`
 </details>
