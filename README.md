@@ -87,6 +87,8 @@ No início, **todos os testes falham com `NotImplementedError`** — isso é esp
 
 Todo o desenvolvimento acontece no GitHub seguindo um fluxo baseado em **Pull Requests**. Não faça commits diretamente em `main`.
 
+> **Importante:** Pull Requests devem ser **pequenos e focados** — uma alteração coesa por vez (ex.: implementar `PinoSaida`, corrigir a propagação do simulador, adicionar o `D_LATCH`). **Não** abra um Pull Request gigante cobrindo uma fase inteira. Fases são apenas um roteiro de estudo; a unidade de revisão é a *pequena alteração*.
+
 ### Fluxo recomendado
 
 <details>
@@ -102,14 +104,14 @@ git remote add upstream https://github.com/<grupo>/nandland.git
 </details>
 
 <details>
-<summary><strong>2. Crie uma branch por fase/passo</strong></summary>
+<summary><strong>2. Crie uma branch por alteração pequena</strong></summary>
 
-Nunca trabalhe direto em `main`. Use nomes descritivos:
+Nunca trabalhe direto em `main`. Cada branch deve corresponder a **uma alteração pequena e coesa**, não a uma fase inteira. Use nomes descritivos:
 
 ```bash
-git checkout -b fase1/pinos
-git checkout -b fase2/porta-nand
-git checkout -b fase3/d-flip-flop
+git checkout -b pinos/pino-saida
+git checkout -b simulador/propagacao
+git checkout -b biblioteca/d-flip-flop
 ```
 </details>
 
@@ -137,9 +139,11 @@ Informe no corpo do Pull Request quais testes passam — ex.: `Fase 1: 12/12`, `
 <details>
 <summary><strong>5. Abra o Pull Request</strong></summary>
 
-Do seu *fork* para a branch `main` do **repositório do grupo** (e não para o repositório original do professor). A integração e a revisão acontecem dentro do grupo; somente o repositório do grupo dialoga com o original. O título deve identificar a fase/passo, por exemplo:
+Do seu *fork* para a branch `main` do **repositório do grupo** (e não para o repositório original do professor). A integração e a revisão acontecem dentro do grupo; somente o repositório do grupo dialoga com o original. O título deve descrever a **alteração específica** daquele Pull Request — não a fase como um todo. Exemplos:
 
-> `Fase 2 — Porta NAND e propagação`
+> `Implementa PinoSaida e seus testes`
+> `Corrige propagação combinacional no Simulador`
+> `Adiciona construir_not ao catálogo`
 </details>
 
 <details>
@@ -171,7 +175,7 @@ git push origin main
 
 ### Boas práticas
 
-- **Um Pull Request por fase** (ou por passo, se a fase for grande). Pull Requests gigantes são difíceis de revisar.
+- **Um Pull Request por pequena alteração** — nunca um Pull Request por fase inteira. Cada Pull Request deve fazer *uma* coisa (um pino, um método, um componente) e ser revisável em poucos minutos. Pull Requests gigantes são difíceis de revisar e atrasam o grupo.
 - Nunca inclua arquivos gerados (`__pycache__/`, `.pytest_cache/`, configs de IDE) — use `.gitignore`.
 - **Nunca** faça commit de credenciais, chaves ou dados pessoais.
 - Mantenha sua branch atualizada com `main` via `git rebase upstream/main` (ou `git merge`) antes de pedir revisão.
