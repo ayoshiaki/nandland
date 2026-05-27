@@ -1,0 +1,514 @@
+\documentclass[11pt,a4paper]{article}
+
+% Pacotes essenciais
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.3cm}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric,shapes.gates.logic.US,fit,backgrounds}
+
+% Paleta de cores
+\definecolor{nandblue}{HTML}{1F3A93}
+\definecolor{nandaccent}{HTML}{E67E22}
+\definecolor{nandgreen}{HTML}{1E8449}
+\definecolor{nandred}{HTML}{C0392B}
+\definecolor{nandbg}{HTML}{F4F6F8}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=nandblue,
+    filecolor=nandblue,
+    urlcolor=nandblue,
+}
+
+% Cabeçalhos de seção estilizados
+\titleformat{\section}[block]
+  {\Large\bfseries\color{nandblue}}
+  {}{0pt}{}
+
+\titleformat{\subsection}[block]
+  {\large\bfseries\color{nandblue!85!black}}
+  {}{0pt}{}
+
+\titlespacing*{\section}{0pt}{1.4ex plus .4ex}{1ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus .3ex}{0.6ex}
+
+% Caixas temáticas
+\newtcolorbox{rulebox}{
+  enhanced, breakable,
+  colback=nandred!4, colframe=nandred!70!black,
+  boxrule=0.6pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  title=\textbf{Regras obrigatórias},
+  fonttitle=\bfseries\color{white},
+  colbacktitle=nandred!75!black,
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={arc=2pt, boxrule=0pt}
+}
+
+\newtcolorbox{acceptbox}{
+  enhanced, breakable,
+  colback=nandgreen!5, colframe=nandgreen!70!black,
+  boxrule=0.6pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  title=\textbf{Critério de aceitação},
+  fonttitle=\bfseries\color{white},
+  colbacktitle=nandgreen!70!black,
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={arc=2pt, boxrule=0pt}
+}
+
+\newtcolorbox{phasebox}[2]{
+  enhanced, breakable,
+  colback=nandbg, colframe=nandblue!75!black,
+  boxrule=0.7pt, arc=3pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+  title=\textbf{#1}\hfill\textit{\small #2},
+  fonttitle=\bfseries\color{white},
+  colbacktitle=nandblue!85!black,
+  attach boxed title to top left={yshift=-2.5mm, xshift=4mm},
+  boxed title style={arc=2pt, boxrule=0pt}
+}
+
+\newtcolorbox{infobox}{
+  enhanced, breakable,
+  colback=nandaccent!6, colframe=nandaccent!75!black,
+  boxrule=0.5pt, arc=2pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt
+}
+
+\setlist[itemize]{leftmargin=1.3em, itemsep=2pt, topsep=3pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt, topsep=3pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{nandblue!40}\leaders\hrule height \headrulewidth\hfill}}
+\fancyhead[L]{\small\color{nandblue!70!black}NANDLand}
+\fancyhead[R]{\small\color{nandblue!70!black}Programação A}
+\fancyfoot[C]{\small\color{nandblue!70!black}\thepage}
+
+\begin{document}
+
+\begin{tcolorbox}[
+  enhanced, colback=nandblue!85!black, colframe=nandblue!85!black,
+  arc=4pt, boxrule=0pt, left=14pt, right=14pt, top=12pt, bottom=12pt
+]
+\begin{center}
+  {\LARGE\bfseries\color{white} NANDLand}\\[3pt]
+  {\large\color{white!90} Simulador de Circuitos Lógicos Universais}\\[6pt]
+  {\color{nandaccent!30}\rule{0.4\textwidth}{0.6pt}}\\[4pt]
+  {\small\color{white!85}\textbf{Disciplina:} Programação A}
+\end{center}
+\end{tcolorbox}
+
+\vspace{0.4cm}
+
+\section*{O que você vai construir}
+
+Toda a computação moderna, do processador do seu celular a um supercomputador, pode ser inteiramente construída a partir de uma \textbf{única} primitiva: a porta lógica \textbf{NAND}. Esse resultado, chamado de \emph{universalidade funcional}, garante que qualquer função booleana (\texttt{AND}, \texttt{OR}, \texttt{NOT}, \texttt{XOR}, somadores, memórias, decodificadores etc.) pode ser obtida combinando-se apenas NANDs.
+
+Neste projeto você implementará, em Python, um \textbf{motor de simulação de circuitos digitais} fiel a esse princípio. Partindo apenas da \texttt{PortaNand} e do conceito de \emph{fios} que transportam sinais booleanos, sua infraestrutura deverá ser capaz de:
+\begin{itemize}
+    \item compor portas NAND para formar circuitos arbitrariamente complexos (NOT, AND, OR, XOR, somadores, registradores etc.);
+    \item tratar cada circuito composto como se fosse uma nova porta de primeira classe, registrável em um \textbf{catálogo} reutilizável;
+    \item simular o tempo de forma síncrona por meio de um \emph{relógio} interno, permitindo que circuitos com \textbf{realimentação} (\textit{latches}, \textit{flip-flops}, registradores) funcionem corretamente sem recursão infinita;
+    \item persistir o catálogo em arquivo, para que seus circuitos sobrevivam entre execuções;
+    \item (opcional, bônus) ser operado por uma \textbf{interface gráfica} que apenas reflete o estado do motor, toda a lógica booleana mora no motor simulado.
+\end{itemize}
+
+\paragraph{O que você aprende.} Três competências são exercitadas em paralelo:
+\begin{enumerate}
+    \item \textbf{Orientação a Objetos}: cada conceito do domínio (pino, porta, circuito, catálogo, simulador) vira uma classe com responsabilidades estritas. Você é forçado a pensar em \emph{polimorfismo}, não em verificações de tipo.
+    \item \textbf{Padrões de Projeto}: o motor é estruturado em torno de padrões clássicos. \textit{Observer} para propagar sinais, \textit{Composite} para criar circuitos complexos a partir da composição de circuitos simples, \textit{Prototype} para realizar a clonagem, \textit{Registry} para implementar um catálogo de circuitos,  e \textit{MVC} para implementar uma interface gráfica.
+    \item \textbf{Modelagem da realidade física}: você descobre, na prática, por que sistemas digitais reais usam \emph{relógio} e \emph{atraso de porta} em vez de propagação instantânea. A semântica adotada aqui é a mesma de simuladores profissionais (Verilog, VHDL).
+\end{enumerate}
+
+\section*{Esqueleto fornecido:  você não começa do zero}
+
+\textbf{Atenção:} o professor disponibiliza um \textbf{repositório-esqueleto} em Python contendo:
+\begin{itemize}
+    \item a \textbf{estrutura completa de pacotes} do projeto;
+    \item todas as \textbf{classes já declaradas} (\texttt{PinoEntrada}, \texttt{PinoSaida}, \texttt{ComponenteLogico}, \texttt{PortaNand}, \texttt{CircuitoComposto}, \texttt{CatalogoCircuitos}, \texttt{Simulador}, \dots), com seus atributos, assinaturas de métodos, tipos e \textit{docstrings};
+    \item a \textbf{bateria completa de testes unitários} (\texttt{pytest}) que serão usados na avaliação.
+\end{itemize}
+O corpo de cada método aparece marcado com \texttt{\# TODO} (ou \texttt{raise NotImplementedError}). \textbf{Sua tarefa é apenas implementar esses corpos.} Não altere nomes de classes, nomes de pinos, assinaturas ou a organização dos módulos. Os testes automáticos dependem deles. Cada passo descrito nas fases a seguir corresponde a um conjunto identificável de \texttt{TODO}s no esqueleto. À medida que você os preenche, mais testes passam (\texttt{pytest -k fase1}, \texttt{fase2}, \dots) .  Com a dinâmica de estudo do The Huxley você já deve estar acostumado com os testes. Para este projeto, cada fase tem uma bateria de testes que deve passar.   
+
+\begin{rulebox}
+\vspace{2pt}
+Para que o foco se mantenha na correta abstração orientada a objetos, as regras a seguir \textbf{não podem ser violadas} (a violação anula a respectiva fase):
+\begin{itemize}
+    \item \textbf{Sem condicionais de tipo no motor.} É \textbf{proibido} usar \texttt{if/elif} ou \texttt{isinstance()} para checar o tipo de uma porta lógica ao avaliá-la. O comportamento deve ser puramente polimórfico.
+    \item \textbf{GUI sem lógica booleana.} Se você fizer a Fase 5, a interface só captura eventos e exibe estados; nenhuma decisão lógica acontece nela (padrão MVC).
+    \item \textbf{Persistência simples.} O catálogo deve ser salvo/carregado em arquivo textual simples (JSON sugerido, \texttt{pickle} aceito). \textbf{Não} use banco de dados, ORM ou frameworks de persistência. O motor deve funcionar sem o arquivo. Ele só preserva circuitos definidos pelo usuário.
+    \item \textbf{NAND é a única primitiva.} \texttt{PortaNand} é o único componente lógico primitivo. Qualquer outra função (NOT, AND, OR, XOR, \textit{latches}, \textit{flip-flops}, registradores) deve \textbf{emergir} da composição de NANDs. Memória de estado vem de \textbf{realimentação}, não de um componente especial.
+    \item \textbf{Simulação síncrona por ciclos.} A propagação \emph{não} é instantânea. Cada \texttt{PinoSaida} tem buffer duplo (\texttt{valor\_atual} e \texttt{valor\_proximo}), e o tempo avança em fases alternadas de \emph{avaliação} e \emph{commit} controladas pelo \texttt{Simulador}. É isso que torna a realimentação possível sem recursão.
+\end{itemize}
+\end{rulebox}
+
+\newpage
+
+\section*{Roteiro de implementação (4 fases)}
+O projeto está dividido em quatro fases. \textbf{Não há prazos semanais fixos}: as fases podem ser executadas em qualquer ritmo, e ao final você deve entregar o máximo que conseguir concluir. Cada fase tem um \textbf{critério de aceitação} estrito que você deve validar antes de avançar.
+
+\begin{phasebox}{Fase 1 — Sistema de Fiação Síncrono (\textit{Observer} com Buffer Duplo)}{}
+Você construirá a infraestrutura de sinais com \textbf{simulação síncrona por ciclos}. Cada pino mantém dois valores ao mesmo tempo: o \textit{valor atual} (lido pelos componentes durante o ciclo) e o \textit{valor próximo} (escrito durante o ciclo, ainda invisível). O avanço do tempo é controlado pelo \texttt{Simulador}.
+
+\paragraph{Modelo conceitual de um ciclo (\texttt{tick}).}
+A Figura~\ref{fig:tick-cycle} resume o ciclo; a Figura~\ref{fig:pino-saida-buffer} mostra o comportamento temporal de um \texttt{PinoSaida}; a Figura~\ref{fig:feedback} adianta por que esse mecanismo é essencial para os circuitos sequenciais da Fase 4.
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{Fase de Avaliação:} cada componente lê o \textit{valor atual} das suas entradas e escreve o \textit{valor próximo} nas suas saídas. Nada disso é visível para outros componentes ainda.
+    \item \textbf{Fase de Commit:} o simulador percorre todos os pinos de saída e copia \emph{valor próximo} $\rightarrow$ \emph{valor atual} simultaneamente. As entradas conectadas são notificadas aqui (não na escrita).
+\end{enumerate}
+
+% ====== Figura 1: Diagrama de temporização do buffer duplo ======
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    every path/.style={thick, line cap=round, line join=round},
+    sig/.style={very thick},
+    lane/.style={font=\small\ttfamily, anchor=east},
+    event/.style={thick, dashed, gray!55},
+    evlbl/.style={font=\footnotesize\ttfamily, fill=white, inner sep=2pt}
+]
+\def\xa{0.0}
+\def\xevA{3.4}
+\def\xevB{7.0}
+\def\xb{9.6}
+\def\hi{0.30}
+\def\lo{-0.30}
+
+\begin{scope}[on background layer]
+    \fill[yellow!40, opacity=0.45] (\xevA, -2.2) rectangle (\xevB, 3.2);
+\end{scope}
+
+\draw[event] (\xevA, -2.2) -- (\xevA, 3.4);
+\draw[event] (\xevB, -2.2) -- (\xevB, 3.4);
+\node[evlbl, anchor=south] at (\xevA, 3.3) {\texttt{set\_proximo(1)}};
+\node[evlbl, anchor=south] at (\xevB, 3.3) {\texttt{Simulador.commit()}};
+
+\node[lane] at (\xa - 0.1, 2.2) {PinoSaida.proximo};
+\draw[sig, orange!85!black]
+    (\xa, 2.2+\lo) -- (\xevA, 2.2+\lo)
+    -- (\xevA, 2.2+\hi)
+    -- (\xb,   2.2+\hi);
+\node[font=\scriptsize] at (\xa+1.6, 2.2+\lo-0.25) {0};
+\node[font=\scriptsize] at (\xevA+1.5, 2.2+\hi+0.25) {1};
+
+\node[lane] at (\xa - 0.1, 1.0) {PinoSaida.atual};
+\draw[sig, blue!70!black]
+    (\xa, 1.0+\lo) -- (\xevB, 1.0+\lo)
+    -- (\xevB, 1.0+\hi)
+    -- (\xb,   1.0+\hi);
+\node[font=\scriptsize] at (\xevA-0.5, 1.0+\lo-0.25) {0};
+\node[font=\scriptsize] at (\xb-0.8, 1.0+\hi+0.25) {1};
+
+\draw[gray!40] (\xa-1.6, 0.2) -- (\xb, 0.2);
+\node[font=\scriptsize\itshape, gray!50!black, anchor=west]
+    at (\xa-1.6, 0.05) {entradas observadoras conectadas:};
+
+\node[lane] at (\xa - 0.1, -0.6) {Entrada X.atual};
+\draw[sig, blue!70!black]
+    (\xa, -0.6+\lo) -- (\xevB, -0.6+\lo)
+    -- (\xevB, -0.6+\hi)
+    -- (\xb,   -0.6+\hi);
+\node[font=\scriptsize] at (\xevA-0.5, -0.6+\lo-0.25) {0};
+\node[font=\scriptsize] at (\xb-0.8, -0.6+\hi+0.25) {1};
+
+\node[lane] at (\xa - 0.1, -1.7) {Entrada Y.atual};
+\draw[sig, blue!70!black]
+    (\xa, -1.7+\lo) -- (\xevB, -1.7+\lo)
+    -- (\xevB, -1.7+\hi)
+    -- (\xb,   -1.7+\hi);
+\node[font=\scriptsize] at (\xevA-0.5, -1.7+\lo-0.25) {0};
+\node[font=\scriptsize] at (\xb-0.8, -1.7+\hi+0.25) {1};
+
+\draw[->, gray!60!black, thick] (\xa, -2.6) -- (\xb+0.2, -2.6)
+    node[right, font=\scriptsize] {tempo};
+
+\node[font=\scriptsize\itshape, gray!25!black, align=center, anchor=north]
+    at ($(\xevA, -2.9)!0.5!(\xevB, -2.9)$)
+    {período em que \texttt{proximo} já contém o novo valor,\\
+     mas \texttt{atual} \emph{ainda não}:observadores nada sabem};
+\end{tikzpicture}
+\caption{Comportamento temporal de um \texttt{PinoSaida} com dois observadores. A trilha laranja é \texttt{valor\_proximo}, que reage imediatamente a \texttt{set\_proximo(1)}. As trilhas azuis são \texttt{valor\_atual} no pino e nas \texttt{PinoEntrada} conectadas:todas ficam em \texttt{0} durante a faixa amarela e saltam para \texttt{1} \emph{simultaneamente} quando o \texttt{Simulador.commit()} promove \texttt{proximo}$\to$\texttt{atual} e dispara as notificações.}
+\label{fig:pino-saida-buffer}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\footnotesize},
+    phase/.style={draw, rounded corners, thick, inner sep=8pt},
+    arr/.style={-{Stealth[length=3.5mm]}, very thick}
+]
+\node[phase, fill=blue!10] (eval) at (0,0)
+    {\begin{minipage}{4.4cm}\small\textbf{1. Avaliação}\\[3pt]
+     {\scriptsize
+     $\bullet$ percorre todos componentes\\
+     $\bullet$ cada \texttt{avaliar()}:\\
+     \quad lê \texttt{entrada.atual}\\
+     \quad escreve \texttt{saida.proximo}\\
+     $\bullet$ observadores \textit{não} disparam}
+     \end{minipage}};
+
+\node[phase, fill=orange!15, right=2.4cm of eval] (commit)
+    {\begin{minipage}{4.4cm}\small\textbf{2. Commit}\\[3pt]
+     {\scriptsize
+     $\bullet$ percorre todos \texttt{PinoSaida}\\
+     $\bullet$ \texttt{atual} $\leftarrow$ \texttt{proximo}\\
+     $\bullet$ dispara \texttt{atualizar()}\\
+     \quad em entradas conectadas\\
+     $\bullet$ retorna \textit{houve mudança?}}
+     \end{minipage}};
+
+\draw[arr, blue!60!black] (eval) -- (commit);
+
+\node[above=0.15cm of eval, font=\small\bfseries] {tick \#$n$};
+\node[above=0.15cm of commit, font=\small\bfseries] {tick \#$n$};
+
+\draw[arr, gray!70!black] (commit.south) .. controls +(0,-1.6) and +(0,-1.6) .. (eval.south)
+    node[midway, below=0.15cm, font=\small\itshape] {próximo tick (se houve mudança)};
+
+\node[draw, rounded corners, dashed, below=2.6cm of $(eval)!0.5!(commit)$,
+      align=left, font=\scriptsize, inner sep=8pt, fill=yellow!8] (inv) {%
+    \textbf{Por que duas fases?}\\
+    Garante que todos os componentes vejam \emph{o mesmo snapshot} ao avaliar.\\
+    Logo: a \textbf{ordem} de avaliação é irrelevante,\\
+    e realimentação não causa recursão.};
+\end{tikzpicture}
+\caption{Ciclo do \texttt{Simulador.tick()}. \texttt{run\_until\_stable()} repete o ciclo até que a fase de commit não detecte mais mudanças (ou atinja o limite de ticks, indicando oscilação).}
+\label{fig:tick-cycle}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    every path/.style={thick, line cap=round, line join=round},
+    gate/.style={nand gate US, draw, fill=blue!5, logic gate inputs=nn,
+                 minimum width=1.6cm, minimum height=1.4cm},
+    pin/.style={font=\ttfamily\small},
+    dot/.style={circle, fill=black, inner sep=0pt, minimum size=4pt},
+    fb/.style={very thick, orange!80!black},
+    fblbl/.style={font=\scriptsize\ttfamily, orange!80!black,
+                  fill=white, inner sep=1.5pt}
+]
+\node[gate] (N1) at (0,  1.6) {};
+\node[font=\small\bfseries] at (N1.center) {$N_1$};
+\node[gate] (N2) at (0, -1.6) {};
+\node[font=\small\bfseries] at (N2.center) {$N_2$};
+
+\draw ($(N1.input 1)+(-1.8,0)$) node[left, pin] {S} -- (N1.input 1);
+\draw ($(N2.input 2)+(-1.8,0)$) node[left, pin] {R} -- (N2.input 2);
+
+\coordinate (qj) at ($(N1.output)+(0.6,0)$);
+\draw (N1.output) -- (qj);
+\node[dot] at (qj) {};
+\draw (qj) -- ++(2.4,0) node[right, pin] {Q};
+\draw[fb] (qj) -- ($(qj)+(0,-4.2)$)
+           -| ($(N2.input 1)+(-1.1,0)$)
+           -- (N2.input 1);
+\node[fblbl] at ($(qj)+(0,-2.2)$) {Q};
+
+\coordinate (qbj) at ($(N2.output)+(1.2,0)$);
+\draw (N2.output) -- (qbj);
+\node[dot] at (qbj) {};
+\draw (qbj) -- ++(1.8,0) node[right, pin] {Q'};
+\draw[fb] (qbj) -- ($(qbj)+(0, 4.2)$)
+            -| ($(N1.input 2)+(-1.1,0)$)
+            -- (N1.input 2);
+\node[fblbl] at ($(qbj)+(0,2.2)$) {Q'};
+
+\node[font=\footnotesize, align=left, anchor=west, draw=gray!40, rounded corners,
+      inner sep=5pt, fill=gray!5]
+    at (5.8, 0)
+    {$Q = \overline{S \cdot Q'}$\\[3pt]
+     $Q' = \overline{R \cdot Q}$\\[5pt]
+     \scriptsize\itshape entradas ativas\\\scriptsize\itshape em nível baixo};
+\end{tikzpicture}
+
+\vspace{0.6em}
+
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c|cc|cc|cc|l}
+\multirow{2}{*}{\textbf{tick}} & \multicolumn{2}{c|}{\textbf{entradas}} &
+\multicolumn{2}{c|}{\textbf{atual}} &
+\multicolumn{2}{c|}{\textbf{próximo}} &
+\multirow{2}{*}{\textbf{observação}} \\
+ & \texttt{S} & \texttt{R} & \texttt{Q} & \texttt{Q'} & \texttt{Q} & \texttt{Q'} & \\\hline
+0 & 1 & 1 & 0 & 1 &:&:& estado guardado, estável \\\hline
+\multicolumn{8}{c}{\itshape usuário aciona pulso de \emph{set}: \texttt{S} $\leftarrow$ 0} \\\hline
+1 & 0 & 1 & 0 & 1 & \cellcolor{orange!15}1 & 1 & \texttt{Q} agendado para mudar \\
+2 & 0 & 1 & \cellcolor{blue!15}1 & 1 & 1 & \cellcolor{orange!15}0 & commit aplica \texttt{Q}; \texttt{Q'} agendado \\
+3 & 0 & 1 & 1 & \cellcolor{blue!15}0 & 1 & 0 & commit aplica \texttt{Q'}; \textbf{estável} \\
+4 & 0 & 1 & 1 & 0 & 1 & 0 & sem mudança $\Rightarrow$ \texttt{run\_until\_stable} encerra \\
+\end{tabular}
+\renewcommand{\arraystretch}{1.0}
+
+\caption{SR-latch construído com duas \texttt{PortaNand} cruzadas (entradas ativas em nível baixo). Sem o buffer duplo, a primeira escrita em \texttt{Q} já notificaria $N_2$, que escreveria em \texttt{Q'}, que notificaria $N_1$ \dots\ provocando recursão infinita.}
+\label{fig:feedback}
+\end{figure}
+
+\paragraph{O que implementar.}
+\begin{itemize}
+    \item \textbf{Passo 1.1:Pino de entrada.} Implemente os \texttt{TODO}s da classe responsável por receber sinais. Ela deve guardar um único valor booleano (o \emph{valor atual} lido pelos componentes) e oferecer uma forma de ser atualizada externamente. Esse mesmo ponto de escrita é usado tanto pelo simulador, na fase de \textit{commit}, quanto por sinais externos do usuário/GUI:o buffer duplo é responsabilidade exclusiva do pino de saída.
+    \item \textbf{Passo 1.2:Pino de saída com buffer duplo.} Preencha os \texttt{TODO}s da classe que carrega \emph{dois} valores simultâneos: o que está visível ao restante do circuito no ciclo corrente e o que está agendado para o próximo ciclo. Ela também precisa manter uma lista de observadores (os pinos de entrada conectados). A escrita no valor agendado \textbf{não} pode notificar observadores; a notificação só acontece quando o ciclo é fechado, no momento em que o valor agendado é promovido a valor visível.
+    \item \textbf{Passo 1.3:Simulador.} Implemente os \texttt{TODO}s da classe que orquestra o tempo. Ela mantém o conjunto de componentes em jogo e o conjunto de pinos de saída cujos buffers precisam ser fechados a cada ciclo. Um ciclo (\emph{tick}) consiste nas duas fases descritas acima:avaliação e \textit{commit}:e deve indicar se algum sinal efetivamente mudou. Além do ciclo unitário, ofereça uma operação que repita ciclos até que o circuito se estabilize, com um teto de iterações para detectar osciladores.
+\end{itemize}
+
+\begin{acceptbox}
+\vspace{2pt}
+Script de teste com um \texttt{PinoSaida} \texttt{S} conectado a duas \texttt{PinoEntrada} \texttt{X} e \texttt{Y} (Figura~\ref{fig:pino-saida-buffer}). Após \texttt{S.set\_proximo(True)}, \textbf{antes} do \texttt{commit} ambas as entradas devem ler \texttt{False}; \textbf{após} o \texttt{commit} (ou \texttt{tick()}), ambas devem ler \texttt{True} \emph{simultaneamente}. Mostre também que escritas concorrentes no mesmo ciclo (\texttt{set\_proximo(True)} seguido de \texttt{set\_proximo(False)} antes do commit) só preservam o último valor, sem notificações intermediárias.
+\end{acceptbox}
+\end{phasebox}
+
+\begin{phasebox}{Fase 2 — Componente Base e Porta Raiz (\textit{Composite} parte 1)}{}
+Aqui você define a primeira e \emph{única} porta lógica real do sistema.
+
+\begin{itemize}
+    \item \textbf{Passo 2.1:Componente abstrato.} Complete a classe-base que define o contrato comum a tudo que pode ser avaliado pelo simulador: avaliar-se, clonar-se e expor recursivamente seus pinos de saída internos (este último é o gancho que o simulador usa ao registrar um componente).
+    \item \textbf{Passo 2.2:Porta NAND.} Implemente os \texttt{TODO}s da única porta primitiva do sistema. Ela é uma especialização do componente abstrato, com duas entradas e uma saída próprias.
+    \item \textbf{Passo 2.3:Avaliação.} Preencha a avaliação da NAND segundo a sua definição lógica, respeitando o contrato do buffer duplo: a avaliação \emph{lê} apenas o valor visível das entradas e \emph{agenda} o resultado na saída. É \textbf{proibido} mexer no valor atual diretamente ou disparar qualquer propagação durante a avaliação.
+    \item \textbf{Passo 2.4:Clonagem.} A clonagem deve produzir uma nova porta independente, com pinos próprios e sem reaproveitar conexões da original. Esse comportamento é o que o catálogo da Fase 3 vai explorar.
+    \item \textbf{Passo 2.5:Exposição de saídas.} Implemente o gancho que devolve a(s) saída(s) interna(s) da porta para o simulador.
+\end{itemize}
+
+\paragraph{Ordem sugerida de implementação.} As Fases 1 e 2 devem ser feitas em conjunto porque o \texttt{Simulador} só pode ser testado com algum \texttt{ComponenteLogico} concreto. Implemente nesta ordem: pinos $\to$ \texttt{ComponenteLogico} $\to$ \texttt{PortaNand} $\to$ \texttt{Simulador}, validando a Fase 1 já com uma \texttt{PortaNand} no circuito de teste.
+
+\begin{acceptbox}
+\vspace{2pt}
+Teste unitário validando a tabela-verdade completa da \texttt{PortaNand} usando o \texttt{Simulador}: para cada combinação de entradas, basta \emph{um único} \texttt{tick()} para que a saída reflita o resultado esperado.
+\end{acceptbox}
+\end{phasebox}
+
+\begin{phasebox}{Fase 3 — Circuitos Compostos e Catálogo (\textit{Composite}, \textit{Prototype}, \textit{Registry})}{}
+A fase central do projeto: fazer com que circuitos complexos se comportem exatamente como se fossem uma única porta lógica.
+
+\begin{itemize}
+    \item \textbf{Passo 3.1:Circuito composto.} Implemente os \texttt{TODO}s da classe que representa um circuito formado pela composição de outros componentes. Ela é, ela própria, um componente lógico: sua avaliação delega às avaliações dos subcomponentes, e a exposição de saídas internas concatena recursivamente as saídas de todos eles. Externamente, o circuito precisa expor um conjunto nomeado de pinos de entrada e de pinos de saída, que funcionam como a ``borda'' visível para quem o usa.
+
+    \textbf{Fan-out de entradas externas.} Um pino externo de entrada pode precisar alimentar \emph{vários} pinos internos:na porta NOT, por exemplo, o pino externo de entrada alimenta as duas entradas da única NAND. Para isso, há uma especialização do pino de entrada com a noção de \emph{espelhos}: ao ser atualizada, ela escreve no próprio valor e repassa o sinal a cada pino interno espelhado. Como ainda é um pino de entrada comum do ponto de vista do tipo, qualquer saída pode conectar-se a ela uniformemente. Preencha os \texttt{TODO}s correspondentes.
+    \item \textbf{Passo 3.2:Catálogo de circuitos.} Implemente os \texttt{TODO}s do \textit{registry} de protótipos. Ele já nasce com a NAND registrada, e deve permitir registrar novos protótipos, listá-los e instanciá-los:sempre devolvendo um clone independente do protótipo, jamais a referência original.
+    \item \textbf{Passo 3.3:Clonagem de compostos.} Complete a clonagem do circuito composto de modo que toda a sua estrutura interna (subcomponentes, pinos e conexões) seja duplicada sem compartilhar referências com o original.
+    \item \textbf{Passo 3.4:Persistência do catálogo.} Implemente os \texttt{TODO}s de salvar e carregar o catálogo em arquivo textual simples. Cada circuito persistido precisa descrever seu nome, seus subcomponentes (referenciados pelo nome de catálogo), as conexões internas entre eles e o mapeamento dos pinos externos para os pinos internos. A primitiva NAND \textbf{não} é serializada:ela é sempre recriada em código. Apenas circuitos derivados, definidos pelo usuário, são persistidos. O carregamento deve respeitar a ordem de dependências entre circuitos (ordenação topológica).
+\end{itemize}
+
+\begin{acceptbox}
+\vspace{2pt}
+Crie programaticamente uma porta \textbf{NOT} (uma \texttt{PortaNand} com as duas entradas conectadas ao mesmo sinal) dentro de um \texttt{CircuitoComposto}, registre-a no catálogo, e prove que modificações estruturais ou de estado em uma instância clonada \textbf{não} afetam o protótipo nem outras instâncias. Toda avaliação deve passar pelo \texttt{Simulador}. Em seguida: \texttt{salvar("catalogo.json")}, criar um novo \texttt{CatalogoCircuitos} vazio, \texttt{carregar("catalogo.json")} e verificar que a porta \texttt{NOT} reconstruída produz a mesma tabela-verdade.
+\end{acceptbox}
+\end{phasebox}
+
+\begin{phasebox}{Fase 4 — Lógica Sequencial por Realimentação (Memória Emergente)}{}
+Agora você colhe o fruto da simulação síncrona da Fase 1: construir memória de estado \textbf{só com NANDs}, sem nenhum componente primitivo novo. A memória surge naturalmente da realimentação cruzada entre saídas e entradas, viabilizada pelo atraso de um ciclo do buffer duplo.
+
+\paragraph{Por que funciona.} Num SR-latch com duas NANDs e saídas cruzadas, se a propagação fosse instantânea o sistema entraria em recursão infinita ou divergiria. Com a simulação por ciclos, cada NAND avalia com base no \emph{valor atual} do ciclo anterior; o \texttt{commit} aplica todas as saídas em paralelo. Após poucos \texttt{tick}s o circuito estabiliza num dos dois estados estáveis do biestável:exatamente o comportamento físico real. (O estado meta-estável só ocorre quando \texttt{S = R = False} simultaneamente.)
+
+\begin{itemize}
+    \item \textbf{Passo 4.1:SR-latch.} Construa um circuito composto correspondente a um SR-latch montado com duas NANDs cujas saídas se alimentam reciprocamente, e registre-o no catálogo com o nome previsto pelo esqueleto. Suas entradas externas são ativas em nível baixo; as duas saídas externas são o estado armazenado e seu complemento. \textbf{Atenção à inicialização:} logo após a montagem, o circuito deve ser colocado em modo \emph{hold} (ambas as entradas em nível alto); do contrário, partindo de pinos zerados, ele entraria no estado indefinido e poderia oscilar.
+    \item \textbf{Passo 4.2:D-latch.} Construa o D-latch, que acrescenta ao SR-latch um \emph{enable} e um sinal de dado. Quando o \emph{enable} está ativo, a saída segue o dado; quando inativo, a saída retém o último valor. Toda a lógica deve sair da composição de NANDs:não introduza novas primitivas. O esqueleto indica o nome do circuito e quais pinos externos expor.
+    \item \textbf{Passo 4.3:Flip-flop D (\textit{master-slave}).} Construa o flip-flop D encadeando dois D-latches em série, de modo que o \emph{enable} de um receba o clock externo e o do outro receba o clock invertido (obtido por composição de NANDs). O efeito desejado é que a saída só mude nas \textbf{bordas de subida} do clock.
+    \item \textbf{Passo 4.4:Registrador de 1 bit.} Encapsule o flip-flop D em um circuito composto que exponha as entradas de dado e clock e a saída armazenada, com o nome previsto pelo esqueleto.
+\end{itemize}
+
+\paragraph{Cuidados com estabilização.}
+\begin{itemize}
+    \item Componentes sequenciais podem levar mais de um \texttt{tick} para estabilizar (tipicamente 2--4 ciclos para o SR-latch, mais para o flip-flop). Sempre chame \texttt{run\_until\_stable()} após mudar um sinal externo.
+    \item Um SR-latch com \texttt{S = R = False} é \textbf{indefinido} fisicamente e pode oscilar no simulador. O limite \texttt{max\_ticks} de \texttt{run\_until\_stable} deve sinalizar essa condição (exceção ou status apropriado).
+\end{itemize}
+
+\begin{acceptbox}
+\vspace{2pt}
+Teste integrado que:
+\begin{enumerate}[label=(\roman*)]
+    \item instancia um \texttt{REGISTRO\_1BIT} via catálogo;
+    \item aplica \texttt{D = True}, dispara uma borda de subida em \texttt{CLK}, chama \texttt{run\_until\_stable} e verifica \texttt{Q = True};
+    \item muda \texttt{D = False} \textbf{sem} acionar o clock, executa novos \texttt{tick}s e verifica que \texttt{Q} permanece \texttt{True} (retenção de estado);
+    \item dispara nova borda de subida em \texttt{CLK} e verifica \texttt{Q = False}.
+\end{enumerate}
+Demonstrando, assim, que memória de estado emerge \emph{puramente} da composição de NANDs sob simulação síncrona.
+\end{acceptbox}
+\end{phasebox}
+
+\begin{phasebox}{Fase 5 (Extra / Opcional) — Interface Gráfica (\textit{MVC})}{Entrega facultativa, conta como bônus}
+\textbf{Não é obrigatória.} As Fases 1--4 já constituem um simulador funcional, operável via scripts. A Fase 5 é um desafio extra para grupos que terminarem as fases obrigatórias e quiserem pontuação adicional.
+
+Construa a camada visual com a \textbf{framework de GUI de sua escolha} (Tkinter, CustomTkinter, PySide/PyQt, Kivy, pygame, web via Flask/FastAPI + HTML, ou qualquer outra). A escolha é livre, desde que a interface respeite o modelo síncrono: nenhuma interação atualiza estado interno diretamente:tudo passa pelo \texttt{Simulador}.
+
+\begin{itemize}
+    \item \textbf{Painel de Catálogo:} lista/menu com os itens disponíveis no \texttt{CatalogoCircuitos} (incluindo \texttt{SR\_LATCH}, \texttt{D\_FLIP\_FLOP}, \texttt{REGISTRO\_1BIT}).
+    \item \textbf{Área de Instanciação:} criação de componentes na tela e ferramentas para conectar saídas a entradas. Cada conexão na GUI vira um \texttt{PinoSaida.conectar(PinoEntrada)} no modelo.
+    \item \textbf{Controle de Simulação:} botões \texttt{Step} (um \texttt{tick}), \texttt{Run} (\texttt{run\_until\_stable}) e \texttt{Clock} (alterna um pino de clock visível). Opcionalmente, mostre o número do ciclo atual.
+    \item \textbf{Persistência:} menu com \texttt{Salvar Catálogo} / \texttt{Carregar Catálogo} delegando aos métodos do \texttt{CatalogoCircuitos}. Se existir um \texttt{catalogo.json} padrão no diretório, carregue-o automaticamente ao iniciar.
+    \item \textbf{Interação:} botões/chaves para injetar sinais (\texttt{0}/\texttt{1}) e LEDs virtuais que leem \texttt{valor\_atual} após cada \texttt{tick}.
+\end{itemize}
+
+\begin{acceptbox}
+\vspace{2pt}
+\textbf{Critério final (bônus).} Pela GUI:
+\begin{enumerate}[label=(\alph*)]
+    \item criar, instanciar e registrar uma porta \textbf{AND} (NAND seguida de NOT — duas NANDs no total) e demonstrar sua tabela-verdade clicando em chaves visuais;
+    \item instanciar um \texttt{REGISTRO\_1BIT}, injetar um valor em \texttt{D}, pulsar \texttt{Clock} e observar que o LED de \texttt{Q} retém o valor mesmo após mudanças subsequentes em \texttt{D} sem novo pulso de clock.
+\end{enumerate}
+\end{acceptbox}
+\end{phasebox}
+
+\section*{Entrega e avaliação}
+
+\paragraph{Formato de entrega.} Repositório Git público (ou \texttt{.zip}) com código-fonte (a partir do esqueleto fornecido, com os \texttt{TODO}s preenchidos), os testes \texttt{pytest} passando e um \texttt{README} com instruções de execução.
+
+\paragraph{Distribuição de pontos (sugerida).} Fases 1+2: 30\% \quad Fase 3: 35\% \quad Fase 4: 35\% \quad Fase 5 (extra): até +20\% de bônus.
+
+\paragraph{Grupos.} \textbf{Mínimo de 2 e máximo de 4 integrantes.} Todos devem ter commits significativos no repositório. \textbf{Entregas individuais sofrerão desconto de 50\% da nota final}:o projeto foi dimensionado para colaboração e exercita explicitamente divisão de tarefas e revisão por pares (\textit{pull requests}).
+
+\paragraph{Como sua nota individual é calculada.} A nota de cada aluno \textbf{não} é simplesmente a do grupo. Ela combina:
+\begin{enumerate}
+    \item \textbf{Prova individual presencial (60\%).} Sem consulta, sobre os conceitos do projeto: padrões aplicados (\textit{Observer}, \textit{Composite}, \textit{Prototype}, \textit{Registry}, MVC), semântica da simulação síncrona, polimorfismo e justificativa das decisões arquiteturais. Você deve ser capaz de explicar e modificar qualquer parte do código entregue pelo seu grupo.
+    \item \textbf{Nota do grupo (25\%).} Produto final:testes passando, qualidade do código, aderência às regras (sem \texttt{isinstance}, sem lógica na GUI, NAND como única primitiva), clareza da documentação. Esta parcela é modulada pelo seu fator de participação $f_i$.
+    \item \textbf{Fator de participação individual (15\%), auditado via GitHub.} Cada aluno recebe $f_i \in [0{,}5;\, 1{,}2]$ calculado a partir do histórico do repositório: número de \textit{commits} qualificados (excluindo \textit{lock files}, binários e código gerado), linhas adicionadas/removidas no núcleo, distribuição temporal dos commits (concentrar tudo na última semana penaliza), \textit{pull requests} abertos, revisões em PRs de colegas, \textit{issues} fechadas e detecção de anomalias (commits gigantes, mensagens genéricas, autoria divergente, \texttt{force-push} reescrevendo histórico alheio). A normalização é feita \emph{dentro de cada grupo}.
+\end{enumerate}
+
+\[
+\text{nota\_final}_i \;=\; 0{,}60 \cdot \text{prova}_i \;+\; 0{,}25 \cdot (\text{nota\_grupo} \cdot f_i) \;+\; 0{,}15 \cdot (f_i \cdot 10)
+\]
+
+\paragraph{Regras de auditoria do GitHub.}
+\begin{itemize}
+    \item Configure \texttt{git config user.email} com seu e-mail institucional. Commits com autoria não verificável podem não ser contabilizados.
+    \item É \textbf{vedado} usar \texttt{git commit -{}-author="Outro <\dots>"} para atribuir trabalho a colegas:isso é fraude acadêmica.
+    \item Toda mudança na \texttt{main} deve passar por \textit{pull request} revisado por outro integrante do grupo.
+    \item \textit{Force-push} em \texttt{main} e \textbf{commits desproporcionalmente grandes}:definidos como aqueles que (a) adicionam mais de \textbf{300 linhas líquidas} no núcleo (excluindo arquivos gerados, \textit{lock files} e binários) \textbf{ou} (b) concentram mais de \textbf{25\% do total de linhas adicionadas pelo autor} em todo o projeto:são sinalizados como anomalias e exigem justificativa.
+\end{itemize}
+
+\paragraph{Salvaguardas anti-carona.}
+\begin{itemize}
+    \item Se $\text{prova}_i < 4{,}0$, a nota final é igual à da prova: não há aprovação por contribuição de grupo sem domínio individual demonstrado.
+    \item Discrepância maior que 2 pontos entre a prova e o fator de participação ($|\text{prova}_i - 10 f_i| > 2$) implica \textbf{entrevista oral} de defesa do código, na qual você deverá explicar trechos centrais que afirma ter escrito. A entrevista pode ajustar tanto $f_i$ quanto a nota da prova.
+\end{itemize}
+
+Ao final do projeto você receberá o detalhamento numérico do seu $f_i$, as métricas que o compõem e a lista de eventuais anomalias detectadas em seu histórico de commits.
+
+\paragraph{Resumo do que entregar.}
+\begin{enumerate}
+    \item Repositório com o esqueleto preenchido (Fases 1--4 obrigatórias; Fase 5 opcional).
+    \item \texttt{pytest} verde no diretório-raiz do projeto.
+    \item \texttt{README.md} com instruções de instalação e execução, e a lista dos integrantes do grupo.
+    \item Histórico de commits saudável (vide regras de auditoria).
+\end{enumerate}
+
+\textbf{Bom projeto!} Ao final, você terá um simulador capaz de modelar desde uma simples porta AND até, em princípio, um pequeno processador:comprovando, na prática, o caminho que vai de um único transistor lógico até uma CPU completa.
+
+\end{document}
